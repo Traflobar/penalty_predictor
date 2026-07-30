@@ -60,7 +60,7 @@
             align-items: center;
             font-family: 'Orbitron', sans-serif;
             color: var(--neon-green);
-            font-size: 14px;
+            font-size: 13px; /* Слегка уменьшил шрифт, чтобы длинное название лучше помещалось */
             font-weight: 700;
         }
 
@@ -71,18 +71,21 @@
             border-radius: 50%;
             display: inline-block;
             margin-right: 10px;
+            flex-shrink: 0;
             box-shadow: 0 0 8px var(--neon-green);
         }
 
         .server-status {
             border: 1px solid var(--neon-blue);
             color: var(--neon-blue);
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             letter-spacing: 1px;
             background: rgba(0, 229, 255, 0.05);
+            white-space: nowrap;
+            margin-left: 10px;
         }
 
         /* Cartes et Écrans */
@@ -341,14 +344,6 @@
                 <h2>SÉLECTIONNER LE JEU</h2>
                 <p class="subtitle">Choisissez l'algorithme à pirater :</p>
                 
-                <div class="game-btn">
-                    <div class="game-info">
-                        <h3>✈️ AVIATOR</h3>
-                        <p>Prédiction du Multiplicateur</p>
-                    </div>
-                    <div class="arrow">➔</div>
-                </div>
-
                 <div class="game-btn" onclick="startLoading()">
                     <div class="game-info">
                         <h3>⚽ PENALTY NATIONS CUP</h3>
