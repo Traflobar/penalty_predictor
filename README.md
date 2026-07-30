@@ -1,1 +1,1 @@
-# penalty_video
+# penalty_predictor
