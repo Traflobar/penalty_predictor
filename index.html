@@ -60,7 +60,7 @@
             align-items: center;
             font-family: 'Orbitron', sans-serif;
             color: var(--neon-green);
-            font-size: 13px;
+            font-size: 13px; 
             font-weight: 700;
         }
 
@@ -190,34 +190,51 @@
             font-size: 16px;
         }
 
-        /* NOUVELLE GRILLE 5x3 (15 Zones) */
+        /* Nouvelle Grille de Penalty (5x3) */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 10px;
+            gap: 8px; /* Reduced gap to fit more items */
             margin: 25px 0;
-            max-width: 100%;
+            aspect-ratio: 5 / 3; /* Matches the goal proportion roughly */
         }
 
         .grid-item {
-            aspect-ratio: 1; /* Pour garder les cercles parfaits */
-            border: 2px dashed var(--text-muted);
-            border-radius: 50%; /* Rend les zones rondes comme dans le jeu */
+            border: 1px dashed var(--border-green);
+            border-radius: 50%; /* Make them circular to match the target icons in game */
+            /* Using padding trick to keep them perfectly square/circular regardless of content */
+            width: 100%;
+            aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            color: var(--text-muted);
             transition: all 0.3s ease;
+            position: relative;
+            background-color: rgba(13, 43, 26, 0.3); /* Slight background to see them better */
+        }
+        
+        /* Inner ball icon placeholder */
+        .grid-item::after {
+            content: '';
+            width: 50%;
+            height: 50%;
+            border: 1px solid var(--text-muted);
+            border-radius: 50%;
+            opacity: 0.5;
         }
 
         .grid-item.highlight {
             border: 2px solid var(--neon-green);
             background: rgba(0, 255, 102, 0.2);
             box-shadow: 0 0 15px var(--neon-green);
-            color: white;
-            font-weight: bold;
+        }
+        
+        .grid-item.highlight::after {
+            border-color: var(--neon-green);
+            opacity: 1;
+            background-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
         }
 
         /* Boutons d'action */
@@ -363,7 +380,7 @@
             </div>
         </div>
 
-        <!-- ECRAN 3 : GRILLE D'ANALYSE -->
+        <!-- ECRAN 3 : GRILLE D'ANALYSE (15 zones) -->
         <div id="screen-grid" class="screen">
             <div class="alert-box">
                 <h2 style="color: #ffa500; font-size: 16px;">ANALYSE DU GARDIEN</h2>
@@ -373,11 +390,9 @@
             <div class="card">
                 <p style="color: var(--text-muted); font-size: 14px; font-weight: bold; margin-top: 0;">ZONE DE TIR RECOMMANDÉE :</p>
                 
-                <!-- Grille vide de 15 éléments (3 lignes x 5 colonnes) -->
-                <div class="grid-container" id="analyze-grid">
-                    <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
-                    <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
-                    <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
+                <!-- 5x3 Grid -->
+                <div class="grid-container" id="empty-grid-container">
+                    <!-- Généré par JavaScript pour correspondre au jeu -->
                 </div>
 
                 <div class="probability">
@@ -393,22 +408,20 @@
         <div id="screen-result" class="screen">
             <div class="alert-box">
                 <h2 style="color: #ffa500; font-size: 16px;">SIGNAL OBTENU !</h2>
-                <p id="result-text" style="margin: 0; font-family: 'Orbitron', sans-serif; font-size: 18px; color: white;">TIRER DANS LA ZONE INDIQUÉE !</p>
+                <p id="signal-text" style="margin: 0; font-family: 'Orbitron', sans-serif; font-size: 18px; color: white;">TIRER DANS LA ZONE INDIQUÉE !</p>
             </div>
 
             <div class="card">
                 <p style="color: var(--text-muted); font-size: 14px; font-weight: bold; margin-top: 0;">ZONE DE TIR RECOMMANDÉE :</p>
                 
-                <!-- Grille de 15 éléments, gérée par JS -->
-                <div class="grid-container" id="result-grid">
-                    <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
-                    <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
-                    <div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div><div class="grid-item"></div>
+                <!-- 5x3 Grid -->
+                <div class="grid-container" id="result-grid-container">
+                     <!-- Généré par JavaScript pour correspondre au jeu -->
                 </div>
 
                 <div class="probability">
                     <span>Probabilité de BUT :</span>
-                    <span class="prob-value" id="random-prob">98.8%</span>
+                    <span class="prob-value">98.8%</span>
                 </div>
             </div>
             
@@ -448,6 +461,26 @@
     </div>
 
     <script>
+        // Generate the 15 grid items (5 cols x 3 rows)
+        function generateGrid(containerId, highlightIndex = -1) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; // Clear existing
+            
+            for (let i = 0; i < 15; i++) {
+                const div = document.createElement('div');
+                div.className = 'grid-item';
+                if (i === highlightIndex) {
+                    div.classList.add('highlight');
+                }
+                container.appendChild(div);
+            }
+        }
+
+        // Initialize empty grids on load
+        generateGrid('empty-grid-container');
+        // Initial setup for result grid without highlight
+        generateGrid('result-grid-container');
+
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
@@ -477,27 +510,21 @@
         function showSignal() {
             showScreen('screen-result');
             
-            // 1. Récupérer tous les éléments de la grille de résultat
-            const gridItems = document.querySelectorAll('#result-grid .grid-item');
+            // Generate a random target between 0 and 14
+            const randomTarget = Math.floor(Math.random() * 15);
             
-            // 2. Nettoyer les anciens résultats (au cas où)
-            gridItems.forEach(item => {
-                item.classList.remove('highlight');
-                item.innerHTML = '';
-            });
-
-            // 3. Choisir une case au hasard parmi les 15
-            const randomIndex = Math.floor(Math.random() * 15);
+            // Re-generate the result grid with the highlighted target
+            generateGrid('result-grid-container', randomTarget);
             
-            // 4. Mettre en surbrillance la case choisie avec un emoji de ballon
-            gridItems[randomIndex].classList.add('highlight');
-            gridItems[randomIndex].innerHTML = '⚽';
-
-            // Variation de probabilité pour plus de réalisme
-            const randomProb = (95 + Math.random() * 4.9).toFixed(1);
-            document.getElementById('random-prob').innerText = randomProb + '%';
+            // Map index to a rough textual description for the alert box
+            const row = Math.floor(randomTarget / 5);
+            const col = randomTarget % 5;
+            let verticalText = row === 0 ? "EN HAUT" : row === 1 ? "AU MILIEU" : "EN BAS";
+            let horizontalText = col < 2 ? "À GAUCHE" : col === 2 ? "AU CENTRE" : "À DROITE";
             
-            // 5. Simule l'attente du tir, puis passe à l'écran de paiement
+            document.getElementById('signal-text').innerText = `TIRER : ${verticalText} ${horizontalText} !`;
+            
+            // Simule l'attente du tir, puis passe à l'écran de paiement
             setTimeout(() => {
                 showScreen('screen-paywall');
             }, 3500);
