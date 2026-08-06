@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kylian Bamba - Prédicteur Penalty Nations Cup</title>
+    <title>Kylian Bamba - Prédicteur Penalty Shoot-Out</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600;700&display=swap');
 
@@ -190,52 +190,63 @@
             font-size: 16px;
         }
 
-        /* Nouvelle Grille de Penalty (5x3) */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 8px; /* Reduced gap to fit more items */
+        /* Nouvelle Grille de Penalty (5 zones spécifiques) */
+        .penalty-goal-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2 / 1.2; /* Proportion approximative du but */
             margin: 25px 0;
-            aspect-ratio: 5 / 3; /* Matches the goal proportion roughly */
+            background-color: rgba(13, 43, 26, 0.1);
+            border: 2px solid var(--border-green);
+            border-radius: 8px;
+            /* Motif de filet de but très léger en fond */
+            background-image: 
+                linear-gradient(45deg, rgba(20, 60, 38, 0.2) 25%, transparent 25%, transparent 75%, rgba(20, 60, 38, 0.2) 75%, rgba(20, 60, 38, 0.2)),
+                linear-gradient(45deg, rgba(20, 60, 38, 0.2) 25%, transparent 25%, transparent 75%, rgba(20, 60, 38, 0.2) 75%, rgba(20, 60, 38, 0.2));
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
 
-        .grid-item {
-            border: 1px dashed var(--border-green);
-            border-radius: 50%; /* Make them circular to match the target icons in game */
-            /* Using padding trick to keep them perfectly square/circular regardless of content */
-            width: 100%;
+        .target-zone {
+            position: absolute;
+            width: 22%; /* Taille relative de la cible */
             aspect-ratio: 1 / 1;
+            border: 1px dashed var(--text-muted);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
-            position: relative;
-            background-color: rgba(13, 43, 26, 0.3); /* Slight background to see them better */
+            background-color: rgba(13, 43, 26, 0.5);
+            transform: translate(-50%, -50%); /* Centrer par rapport au point d'ancrage */
         }
         
-        /* Inner ball icon placeholder */
-        .grid-item::after {
-            content: '';
-            width: 50%;
-            height: 50%;
-            border: 1px solid var(--text-muted);
-            border-radius: 50%;
-            opacity: 0.5;
+        .target-zone::after {
+            content: '⚽'; /* Utilisation d'un emoji ballon pour ressembler au jeu */
+            font-size: 1.5rem;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            filter: grayscale(100%);
         }
 
-        .grid-item.highlight {
+        .target-zone.highlight {
             border: 2px solid var(--neon-green);
-            background: rgba(0, 255, 102, 0.2);
-            box-shadow: 0 0 15px var(--neon-green);
+            background: rgba(0, 255, 102, 0.3);
+            box-shadow: 0 0 15px var(--neon-green), inset 0 0 10px var(--neon-green);
         }
         
-        .grid-item.highlight::after {
-            border-color: var(--neon-green);
+        .target-zone.highlight::after {
             opacity: 1;
-            background-color: var(--neon-green);
-            box-shadow: 0 0 10px var(--neon-green);
+            filter: grayscale(0%);
+            text-shadow: 0 0 10px var(--neon-green);
         }
+
+        /* Positions spécifiques des 5 cibles */
+        .target-0 { top: 20%; left: 15%; } /* Haut Gauche */
+        .target-1 { top: 15%; left: 50%; } /* Haut Centre */
+        .target-2 { top: 20%; left: 85%; } /* Haut Droite */
+        .target-3 { top: 75%; left: 15%; } /* Bas Gauche */
+        .target-4 { top: 75%; left: 85%; } /* Bas Droite */
 
         /* Boutons d'action */
         .action-btn {
@@ -359,7 +370,7 @@
                 
                 <div class="game-btn" onclick="startLoading()">
                     <div class="game-info">
-                        <h3>⚽ PENALTY NATIONS CUP</h3>
+                        <h3>⚽ PENALTY SHOOT-OUT</h3>
                         <p>Détection de la Zone de But</p>
                     </div>
                     <div class="arrow">➔</div>
@@ -380,7 +391,7 @@
             </div>
         </div>
 
-        <!-- ECRAN 3 : GRILLE D'ANALYSE (15 zones) -->
+        <!-- ECRAN 3 : GRILLE D'ANALYSE -->
         <div id="screen-grid" class="screen">
             <div class="alert-box">
                 <h2 style="color: #ffa500; font-size: 16px;">ANALYSE DU GARDIEN</h2>
@@ -390,9 +401,13 @@
             <div class="card">
                 <p style="color: var(--text-muted); font-size: 14px; font-weight: bold; margin-top: 0;">ZONE DE TIR RECOMMANDÉE :</p>
                 
-                <!-- 5x3 Grid -->
-                <div class="grid-container" id="empty-grid-container">
-                    <!-- Généré par JavaScript pour correspondre au jeu -->
+                <!-- Disposition des cibles (5 zones) -->
+                <div class="penalty-goal-container" id="empty-goal-container">
+                    <div class="target-zone target-0"></div>
+                    <div class="target-zone target-1"></div>
+                    <div class="target-zone target-2"></div>
+                    <div class="target-zone target-3"></div>
+                    <div class="target-zone target-4"></div>
                 </div>
 
                 <div class="probability">
@@ -414,9 +429,13 @@
             <div class="card">
                 <p style="color: var(--text-muted); font-size: 14px; font-weight: bold; margin-top: 0;">ZONE DE TIR RECOMMANDÉE :</p>
                 
-                <!-- 5x3 Grid -->
-                <div class="grid-container" id="result-grid-container">
-                     <!-- Généré par JavaScript pour correspondre au jeu -->
+                <!-- Disposition des cibles (5 zones) avec résultat -->
+                <div class="penalty-goal-container" id="result-goal-container">
+                    <div class="target-zone target-0" id="res-target-0"></div>
+                    <div class="target-zone target-1" id="res-target-1"></div>
+                    <div class="target-zone target-2" id="res-target-2"></div>
+                    <div class="target-zone target-3" id="res-target-3"></div>
+                    <div class="target-zone target-4" id="res-target-4"></div>
                 </div>
 
                 <div class="probability">
@@ -461,26 +480,8 @@
     </div>
 
     <script>
-        // Generate the 15 grid items (5 cols x 3 rows)
-        function generateGrid(containerId, highlightIndex = -1) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = ''; // Clear existing
-            
-            for (let i = 0; i < 15; i++) {
-                const div = document.createElement('div');
-                div.className = 'grid-item';
-                if (i === highlightIndex) {
-                    div.classList.add('highlight');
-                }
-                container.appendChild(div);
-            }
-        }
-
-        // Initialize empty grids on load
-        generateGrid('empty-grid-container');
-        // Initial setup for result grid without highlight
-        generateGrid('result-grid-container');
-
+        // L'ancienne fonction generateGrid n'est plus nécessaire car les cibles sont fixes en HTML
+        
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
@@ -507,24 +508,53 @@
             }, 100);
         }
 
+        /* 
+         * NOUVELLE LOGIQUE DE CIBLES (5 positions):
+         * 0: Haut Gauche
+         * 1: Haut Centre
+         * 2: Haut Droite
+         * 3: Bas Gauche
+         * 4: Bas Droite
+         *
+         * Séquence vidéo originale ajustée à la nouvelle numérotation :
+         * 1. En bas à droite -> 4
+         * 2. En bas à droite -> 4
+         * 3. En haut à droite -> 2
+         * 4. En haut à gauche -> 0
+         * 5. En haut à gauche -> 0
+         */
+        const sequenceVideo = [4, 4, 2, 0, 0];
+        let indexSignalActuel = 0;
+
         function showSignal() {
             showScreen('screen-result');
             
-            // Generate a random target between 0 and 14
-            const randomTarget = Math.floor(Math.random() * 15);
+            // Récupérer la cible depuis la séquence
+            const targetIndex = sequenceVideo[indexSignalActuel];
             
-            // Re-generate the result grid with the highlighted target
-            generateGrid('result-grid-container', randomTarget);
+            // Réinitialiser toutes les cibles du résultat
+            for (let i = 0; i < 5; i++) {
+                document.getElementById('res-target-' + i).classList.remove('highlight');
+            }
             
-            // Map index to a rough textual description for the alert box
-            const row = Math.floor(randomTarget / 5);
-            const col = randomTarget % 5;
-            let verticalText = row === 0 ? "EN HAUT" : row === 1 ? "AU MILIEU" : "EN BAS";
-            let horizontalText = col < 2 ? "À GAUCHE" : col === 2 ? "AU CENTRE" : "À DROITE";
+            // Mettre en évidence la cible choisie
+            document.getElementById('res-target-' + targetIndex).classList.add('highlight');
             
-            document.getElementById('signal-text').innerText = `TIRER : ${verticalText} ${horizontalText} !`;
+            // Texte descriptif basé sur le nouvel index
+            let textDescription = "";
+            switch(targetIndex) {
+                case 0: textDescription = "EN HAUT À GAUCHE"; break;
+                case 1: textDescription = "EN HAUT AU CENTRE"; break;
+                case 2: textDescription = "EN HAUT À DROITE"; break;
+                case 3: textDescription = "EN BAS À GAUCHE"; break;
+                case 4: textDescription = "EN BAS À DROITE"; break;
+            }
             
-            // Simule l'attente du tir, puis passe à l'écran de paiement
+            document.getElementById('signal-text').innerText = `TIRER : ${textDescription} !`;
+            
+            // Passer au signal suivant pour le prochain tour
+            indexSignalActuel = (indexSignalActuel + 1) % sequenceVideo.length;
+            
             setTimeout(() => {
                 showScreen('screen-paywall');
             }, 3500);
